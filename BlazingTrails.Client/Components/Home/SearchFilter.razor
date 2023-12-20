@@ -1,0 +1,58 @@
+﻿@inject NavigationManager navManager
+
+<div class="filters">
+    <label for="maxLength">Max Length</label>
+    <input id="maxLength"
+           type="number"
+           class="form-control"
+           @bind="maxLength" />
+    <label for="maxTime">Max Time (hours)</label>
+
+    <input id="maxTime"
+           type="number"
+           class="form-control"
+           @bind="maxTime" />
+
+    <button class="btn btn-outline-primary"
+            @onclick="SearchForTrail">
+        Filter
+    </button>
+    <button class="btn btn-outline-secondary"
+            @onclick="Clear">
+        Clear
+    </button>
+</div>
+
+@code {
+    [Parameter] public int? maxLength { get; set; }
+    [Parameter] public int? maxTime { get; set; }
+
+    private int _maxLength;
+    private int _maxTime;
+
+    [Parameter, EditorRequired] public string searchTerm { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        _maxLength = maxLength ?? 0;
+        _maxTime = maxTime ?? 0;
+    }
+
+    private void SearchForTrail()
+    {
+        var uriWithQuerystring = navManager.GetUriWithQueryParameters(new Dictionary<string, object?>()
+        {
+            [nameof(SearchPage.maxLength)] = maxLength == 0 ? null : maxLength,
+            [nameof(SearchPage.maxTime)] = maxTime == 0 ? null : maxTime
+        });
+
+        navManager.NavigateTo(uriWithQuerystring);
+    }
+
+    private void Clear()
+    {
+        maxLength = 0;
+        maxTime = 0;
+        navManager.NavigateTo($"/search/{searchTerm}");
+    }
+}

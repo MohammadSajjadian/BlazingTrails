@@ -1,0 +1,39 @@
+﻿@page "/"
+@inject HttpClient httpClient
+
+@if (trails is null)
+{
+    <p>Loading trails...</p>
+}
+else
+{
+    <TrailSearch />
+
+    <TrailDetails trail="selectedTrail" />
+    <div class="grid">
+        @foreach (var trail in trails)
+        {
+            <TrailCard trail="trail" OnSelected="HandleTrailSelected" />
+        }
+    </div>
+}
+
+@code{
+    private List<Trail>? trails;
+    private Trail? selectedTrail;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            trails = await httpClient.GetFromJsonAsync<List<Trail>>("trails/trail-data.json");
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"Something went wrong in loading json data: {ex.Message}");
+        }
+    }
+
+    private void HandleTrailSelected(Trail trail)
+        => selectedTrail = trail;
+}

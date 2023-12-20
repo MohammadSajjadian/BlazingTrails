@@ -1,0 +1,53 @@
+﻿@inherits InputBase<int>
+
+<div class="input-time">
+    <div>
+        <input @onchange="AddHours" value="@hours" class="form-control @CssClass"
+               type="number"
+               min="0" />
+        <label>Hours</label>
+    </div>
+    <div>
+        <input @onchange="AddMinutes" value="@minutes" class="form-control @CssClass"
+               type="number"
+               min="0"
+               max="59" />
+        <label>Minutes</label>
+    </div>
+</div>
+
+@code {
+    private int hours;
+    private int minutes;
+
+    protected override bool TryParseValueFromString(string value, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out int result, [System.Diagnostics.CodeAnalysis.NotNullWhen(false)] out string validationErrorMessage)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void AddHours(ChangeEventArgs args)
+    {
+        var houreValue = int.TryParse(args.Value?.ToString(), out hours);
+        CalculateValue();
+    }
+
+    private void AddMinutes(ChangeEventArgs args)
+    {
+        var minuteValue = int.TryParse(args.Value?.ToString(), out minutes);
+        CalculateValue();
+    }
+
+    private void CalculateValue()
+    {
+        CurrentValue = (hours * 60) + minutes;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (CurrentValue > 0)
+        {
+            hours = CurrentValue / 60;
+            minutes = CurrentValue % 60;
+        }
+    }
+}
