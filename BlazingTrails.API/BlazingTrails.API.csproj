@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <InvariantGlobalization>true</InvariantGlobalization>
+    <InvariantGlobalization>false</InvariantGlobalization>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +22,10 @@
     <ProjectReference Include="..\BlazingTrails.Application\BlazingTrails.Application.csproj" />
     <ProjectReference Include="..\BlazingTrails.Client\BlazingTrails.Client.csproj" />
     <ProjectReference Include="..\BlazingTrails.Infra\BlazingTrails.Infra.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Images\" />
   </ItemGroup>
 
 </Project>

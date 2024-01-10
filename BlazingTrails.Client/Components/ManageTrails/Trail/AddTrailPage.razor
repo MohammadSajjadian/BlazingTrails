@@ -1,0 +1,77 @@
+﻿@page "/add-trail"
+@inject IMediator mediator
+
+<PageTitle>Add Trail - Blazing Trails</PageTitle>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Add Trail</li>
+    </ol>
+</nav>
+<h3 class="mt-5 mb-4">Add a trail</h3>
+
+@if (isLoading)
+{
+    <div class="spinner-border"></div>
+}
+else
+{
+    @if (isSuccessful)
+    {
+        <SuccessAlert message="Your trail has been successfuly added." />
+    }
+    else if (errorMessage is not null)
+    {
+        <ErrorAlert message="@errorMessage" />
+    }
+}
+
+<TrailForm @ref="trailForm" OnSubmit="AddNewTrail" />
+
+@code{
+    private TrailForm trailForm = default!;
+
+    public string? errorMessage;
+    public bool isSuccessful;
+    public bool isLoading;
+
+    private async Task AddNewTrail(TrailDto trailDto, IBrowserFile trailImg)
+    {
+        isLoading = true;
+
+        var response = await mediator.Send(new AddTrailRequest(trailDto));
+        if (response.trailId is -1)
+        {
+            errorMessage = response.errorMessage;
+            isLoading = false;
+            isSuccessful = false;
+            StateHasChanged();
+            return;
+        }
+        if (trailImg is null)
+        {
+            trailForm.ResetForm();
+            isLoading = false;
+            isSuccessful = true;
+            StateHasChanged();
+            return;
+        }
+        await SendImage(response.trailId, trailImg);
+    }
+
+    private async Task SendImage(int trailId, IBrowserFile trailImg)
+    {
+        var response = await mediator.Send(new UploadTrailImageRequest(trailId, trailImg));
+        if (String.IsNullOrEmpty(response.imageName))
+        {
+            isLoading = false;
+            errorMessage = response.errorMessage;
+            StateHasChanged();
+            return;
+        }
+        isLoading = false;
+        isSuccessful = true;
+        trailForm.ResetForm();
+        StateHasChanged();
+    }
+}

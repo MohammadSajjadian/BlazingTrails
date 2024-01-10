@@ -1,8 +1,8 @@
 ﻿using Ardalis.ApiEndpoints;
 using BlazingTrails.Application.Commands.Trail.Requests;
-using BlazingTrails.Domain.Entities;
 using BlazingTrails.Infra.Context;
 using Microsoft.AspNetCore.Mvc;
+using Trail = BlazingTrails.Domain.Entities.Trail;
 
 namespace BlazingTrails.API.EndPoints
 {
@@ -40,7 +40,7 @@ namespace BlazingTrails.API.EndPoints
 
         private async Task AddRouteInstructionAsync(Trail trail, AddTrailRequest request, CancellationToken cancellationToken = default)
         {
-            var routeInstructions = request.trailDto.Routes.Select(x => new RouteInstruction
+            var routeInstructions = request.trailDto.Routes.Select(x => new Domain.Entities.RouteInstruction
             {
                 Stage = x.Stage,
                 Description = x.Description,

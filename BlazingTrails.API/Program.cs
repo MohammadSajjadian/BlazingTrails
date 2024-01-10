@@ -9,7 +9,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -31,7 +30,13 @@ else
 app.UseHttpsRedirection();
 
 app.UseBlazorFrameworkFiles();
+
 app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Images")),
+    RequestPath = "/Images"
+});
 
 app.UseAuthorization();
 

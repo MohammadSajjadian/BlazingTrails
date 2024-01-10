@@ -1,0 +1,112 @@
+﻿@page "/edit-trail/{trailId:int}"
+@inject IMediator mediator
+
+<PageTitle>Edit Trail - Blazing Trails</PageTitle>
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Edit Trail</li>
+    </ol>
+</nav>
+@if (isLoading)
+{
+    <p>Loading trail...</p>
+}
+else
+{
+    <h3 class="mt-5 mb-4">Editing trail: @oldTrail.Name</h3>
+    @if (isSuccessful)
+    {
+        <SuccessAlert message="Your trail has been edited successfully!" />
+    }
+    else if (errorMessage is not null)
+    {
+        <ErrorAlert message="@errorMessage" />
+    }
+    <TrailForm oldTrail="oldTrail" OnSubmit="SubmitEditTrail" />
+}
+
+@code {
+    private TrailDto oldTrail = new();
+
+    private bool isLoading;
+    private bool isSuccessful;
+    private string? errorMessage;
+
+    [Parameter]
+    public int trailId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+
+        var response = await mediator.Send(new GetTrailRequest(trailId));
+        if (response.trail is null)
+        {
+            errorMessage = response.errorMessage;
+        }
+        else
+        {
+            oldTrail.Id = trailId;
+            oldTrail.Name = response.trail.name;
+            oldTrail.Description = response.trail.description;
+            oldTrail.Location = response.trail.location;
+            oldTrail.image = response.trail.image;
+            oldTrail.Length = response.trail.length;
+            oldTrail.TimeInMinutes = response.trail.timeInMinutes;
+            oldTrail.Routes.Clear();
+            oldTrail.Routes.AddRange(response.trail.routeInstructions.Select(x => new Domain.Entities.RouteInstruction
+            {
+                Stage = x.Stage,
+                Description = x.Description
+            }));
+        }
+
+        isLoading = false;
+    }
+
+    private async Task SubmitEditTrail(TrailDto newTrail, IBrowserFile trailImg)
+    {
+        var response = await mediator.Send(new EditTrailRequest(newTrail));
+        if (!response.isSuccess)
+        {
+            isSuccessful = false;
+            errorMessage = response.errorMessage;
+        }
+        else
+        {
+            oldTrail.Name = newTrail.Name;
+            oldTrail.Description = newTrail.Description;
+            oldTrail.Location = newTrail.Location;
+            oldTrail.Length = newTrail.Length;
+            oldTrail.TimeInMinutes = newTrail.TimeInMinutes;
+            oldTrail.Routes.Clear();
+            oldTrail.Routes.AddRange(newTrail.Routes.Select(x => new Domain.Entities.RouteInstruction
+            {
+                Stage = x.Stage,
+                Description = x.Description
+            }));
+            isSuccessful = true;
+
+            if (newTrail.ImageAction is ImageAction.Remove)
+                oldTrail.image = null;
+
+            if (newTrail.ImageAction is ImageAction.Add)
+                await SendImage(newTrail.Id, trailImg);
+        }
+        StateHasChanged();
+    }
+
+    private async Task<bool> SendImage(int trailId, IBrowserFile trailImage)
+    {
+        var response = await mediator.Send(new UploadTrailImageRequest(trailId, trailImage));
+        if (string.IsNullOrWhiteSpace(response.imageName))
+        {
+            errorMessage = response.errorMessage;
+            return false;
+        }
+        oldTrail.image = response.imageName;
+        return true;
+    }
+}

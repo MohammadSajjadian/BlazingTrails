@@ -16,7 +16,7 @@ namespace BlazingTrails.API.EndPoints
         }
 
         [HttpPost(UploadTrailImageRequest.route)]
-        public override async Task<ActionResult<string>> HandleAsync([FromRoute] int trailId, CancellationToken cancellationToken = default)
+        public override async Task<ActionResult<string>> HandleAsync(int trailId, CancellationToken cancellationToken = default)
         {
             var trail = db.trails.Find(trailId);
             if (trail is null) return BadRequest("Trail dose not found.");
@@ -24,7 +24,7 @@ namespace BlazingTrails.API.EndPoints
             var file = Request.Form.Files[0];
             if (file.Length is 0) return BadRequest("Image not found.");
 
-            var fileName = $"{file.FileName}.jpg";
+            var fileName = $"{Guid.NewGuid()}.jpg";
             var saveLocation = Path.Combine(Directory.GetCurrentDirectory(), "images", fileName);
 
             var resizeOptions = new ResizeOptions()

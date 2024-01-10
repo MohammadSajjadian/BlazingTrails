@@ -13,15 +13,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastru
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{993394CA-3FDB-461F-9512-D4565D36A496}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazingTrails.API", "BlazingTrails.API\BlazingTrails.API.csproj", "{7DBC1737-6E8F-4FF6-8B94-2C1171712312}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazingTrails.API", "BlazingTrails.API\BlazingTrails.API.csproj", "{7DBC1737-6E8F-4FF6-8B94-2C1171712312}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazingTrails.Application", "BlazingTrails.Application\BlazingTrails.Application.csproj", "{6171FF43-D019-4AAD-9949-A5D6518BF0BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazingTrails.Application", "BlazingTrails.Application\BlazingTrails.Application.csproj", "{6171FF43-D019-4AAD-9949-A5D6518BF0BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazingTrails.Domain", "BlazingTrails.Domain\BlazingTrails.Domain.csproj", "{BBCDF239-7528-482A-B0DD-A0DCD0498B3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazingTrails.Domain", "BlazingTrails.Domain\BlazingTrails.Domain.csproj", "{BBCDF239-7528-482A-B0DD-A0DCD0498B3F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazingTrails.Infra", "BlazingTrails.Infra\BlazingTrails.Infra.csproj", "{71A1BEEC-1A2D-4AB9-A747-EBD22A83CE30}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazingTrails.Infra", "BlazingTrails.Infra\BlazingTrails.Infra.csproj", "{71A1BEEC-1A2D-4AB9-A747-EBD22A83CE30}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazingTrails.Client", "BlazingTrails.Client\BlazingTrails.Client.csproj", "{C6E6B23B-70C3-4BAC-A95D-9832058DE2CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazingTrails.Client", "BlazingTrails.Client\BlazingTrails.Client.csproj", "{C6E6B23B-70C3-4BAC-A95D-9832058DE2CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
