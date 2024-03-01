@@ -6,16 +6,23 @@ namespace BlazingTrails.Application.Query.Trail.Handlers
 {
     public class GetTrailHandler : IRequestHandler<GetTrailRequest, GetTrailResponse>
     {
-        private readonly HttpClient _httpClient;
-        public GetTrailHandler(HttpClient httpClient)
+        private readonly IHttpClientFactory httpClientFactory;
+        public GetTrailHandler(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClient;
+            this.httpClientFactory = httpClientFactory; ;
         }
 
-        public async Task<GetTrailResponse> Handle(GetTrailRequest request, CancellationToken cancellationToken)
+        public async Task<GetTrailResponse?> Handle(GetTrailRequest request, CancellationToken cancellationToken)
         {
-            var response = await _httpClient.GetFromJsonAsync<GetTrailResponse>(GetTrailRequest.route.Replace("{trailId}", request.trailId.ToString()));
-            return response;
+            try
+            {
+                var client = httpClientFactory.CreateClient("SecureAPIClient");
+                return await client.GetFromJsonAsync<GetTrailResponse>(GetTrailRequest.route.Replace("{trailId}", request.trailId.ToString()), cancellationToken: cancellationToken);
+            }
+            catch (HttpRequestException)
+            {
+                return default!;
+            }
         }
     }
 }

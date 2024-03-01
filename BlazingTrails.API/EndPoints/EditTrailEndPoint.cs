@@ -3,6 +3,7 @@ using BlazingTrails.Application.Commands.Trail.Requests;
 using BlazingTrails.Application.Enum;
 using BlazingTrails.Domain.Entities;
 using BlazingTrails.Infra.Context;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,24 +17,28 @@ namespace BlazingTrails.API.EndPoints
             this.db = db;
         }
 
+        [Authorize]
         [HttpPut(EditTrailRequest.route)]
         public override async Task<ActionResult<bool>> HandleAsync(EditTrailRequest request, CancellationToken cancellationToken = default)
         {
-            var trail = await db.trails.Include(x => x.Routes).SingleOrDefaultAsync(x => x.Id == request.trailDto.Id, cancellationToken: cancellationToken);
+            var trail = await db.trails.Include(x => x.waypoints).SingleOrDefaultAsync(x => x.Id == request.trailDto.Id, cancellationToken: cancellationToken);
             if (trail is null)
                 return BadRequest("Trail could not be found.");
+
+            if (!trail.Owner.Equals(User.Identity.Name, StringComparison.OrdinalIgnoreCase))
+                return Unauthorized();
 
             trail.Name = request.trailDto.Name;
             trail.Description = request.trailDto.Description;
             trail.Location = request.trailDto.Location;
             trail.TimeInMinutes = request.trailDto.TimeInMinutes;
             trail.Length = request.trailDto.Length;
-            trail.Routes.Clear();
-            trail.Routes = request.trailDto.Routes.Select(x => new RouteInstruction
+            trail.waypoints.Clear();
+            trail.waypoints = request.trailDto.Waypoints.Select(wp => new Waypoint
             {
-                Stage = x.Stage,
-                Description = x.Description,
-                Trail = trail
+                latitude = wp.Latitude,
+                longitude = wp.Longitude,
+                trail = trail
             }).ToList();
 
             if (request.trailDto.ImageAction == ImageAction.Remove)

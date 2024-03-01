@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BlazingTrails.Domain.Entities
+﻿namespace BlazingTrails.Domain.Entities
 {
     public class Trail
     {
         public int Id { get; set; }
+        public string Owner { get; set; } = default!;
         public string Name { get; set; } = default!;
         public string Description { get; set; } = default!;
         public string? Image { get; set; }
@@ -16,6 +11,6 @@ namespace BlazingTrails.Domain.Entities
         public int TimeInMinutes { get; set; }
         public int Length { get; set; }
 
-        public ICollection<RouteInstruction> Routes { get; set; } = default!;
+        public ICollection<Waypoint> waypoints { get; set; } = default!;
     }
 }

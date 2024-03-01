@@ -9,9 +9,8 @@ namespace BlazingTrails.Validation
             var model = editContext.Model;
             var isValid = !editContext.GetValidationMessages(fieldIdentifier).Any();
             if (editContext.IsModified(fieldIdentifier))
-            {
                 return isValid ? " is-valid" : "is-invalid";
-            }
+
             return isValid ? "" : "is-invalid";
         }
     }

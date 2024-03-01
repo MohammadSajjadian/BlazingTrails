@@ -1,15 +1,14 @@
 ﻿using BlazingTrails.Application.Commands.Trail.Requests;
 using MediatR;
-using System.Net.Http.Json;
 
 namespace BlazingTrails.Application.Commands.Trail.Handlers
 {
     public class AddTrailImageHandler : IRequestHandler<UploadTrailImageRequest, UploadTrailImageResponse>
     {
-        private readonly HttpClient _httpClient;
-        public AddTrailImageHandler(HttpClient _httpClient)
+        private readonly IHttpClientFactory httpClientFactory;
+        public AddTrailImageHandler(IHttpClientFactory httpClientFactory)
         {
-            this._httpClient = _httpClient;
+            this.httpClientFactory = httpClientFactory;
         }
 
         public async Task<UploadTrailImageResponse> Handle(UploadTrailImageRequest request, CancellationToken cancellationToken)
@@ -28,11 +27,14 @@ namespace BlazingTrails.Application.Commands.Trail.Handlers
         }
 
 
-        public bool IsImageSizeConfirmed(UploadTrailImageRequest request) => request.trailImg.Size < 2 * Math.Pow(1024, 2); // 2 MB
+        public bool IsImageSizeConfirmed(UploadTrailImageRequest request) =>
+            request.trailImg.Size < 2 * Math.Pow(1024, 2); // 2 MB
 
-        public UploadTrailImageResponse CreateErrorResponse(string errorMessage) => new(null, errorMessage);
+        public UploadTrailImageResponse CreateErrorResponse(string errorMessage) =>
+            new(null, errorMessage);
 
-        public Stream ReadFile(UploadTrailImageRequest request, CancellationToken cancellationToken) => request.trailImg.OpenReadStream(request.trailImg.Size, cancellationToken);
+        public Stream ReadFile(UploadTrailImageRequest request, CancellationToken cancellationToken) =>
+            request.trailImg.OpenReadStream(request.trailImg.Size, cancellationToken);
 
         public MultipartFormDataContent CreateContent(Stream file, UploadTrailImageRequest request)
         {
@@ -44,8 +46,9 @@ namespace BlazingTrails.Application.Commands.Trail.Handlers
 
         public async Task<HttpResponseMessage> SendUploadRequest(UploadTrailImageRequest request, MultipartFormDataContent content, CancellationToken cancellationToken)
         {
+            var client = httpClientFactory.CreateClient("SecureAPIClient");
             var route = UploadTrailImageRequest.route.Replace("{trailId}", request.trailId.ToString());
-            return await _httpClient.PostAsync(route, content, cancellationToken);
+            return await client.PostAsync(route, content, cancellationToken);
         }
 
         public UploadTrailImageResponse CreateSuccessResponse(string imageName) => new(imageName, null);

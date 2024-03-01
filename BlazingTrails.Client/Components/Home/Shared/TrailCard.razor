@@ -1,0 +1,46 @@
+﻿@inject NavigationManager navManager
+
+<div class="card shadow" style="width: 18rem;">
+    @if (trail.Image is not null)
+    {
+        <img src="@(!String.IsNullOrEmpty(trail.Image) ? $"/Images/{trail.Image}" : "https://via.placeholder.com/400x200.jpg?text=No+Image+For+Trail")" class="card-img-top" alt="@trail.Name">
+    }
+    else
+    {
+        <img src="https://via.placeholder.com/400x200.jpg" class="card-img-top" alt="@trail.Name">
+    }
+    <div class="card-body">
+        <h5 class="card-title">@trail.Name</h5>
+        <h6 class="card-subtitle mb-3 text-muted">
+            <span class="oi oi-map-marker"></span>
+            @trail.Location
+        </h6>
+        <div class="d-flex justify-content-between">
+            <span>
+                <span class="oi oi-infinity mr-2"></span>
+                @trail.Length km
+            </span>
+        </div>
+    </div>
+    <div class="card-body">
+        <button class="btn btn-primary" @onclick="@(async () => await OnSelected.InvokeAsync(trail))">
+            <i class="fa fa-binoculars"></i>
+        </button>
+        <AuthorizeView>
+            @if (trail.Owner.Equals(context.User.Identity?.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                <button class="btn btn-outline-secondary float-right" title="Edit" @onclick="@(() => navManager.NavigateTo($"/edit-trail/{trail.Id}"))">
+                    <i class="fa fa-pencil"></i>
+                </button>
+            }
+        </AuthorizeView>
+    </div>
+</div>
+
+@code{
+    [Parameter, EditorRequired]
+    public Trail trail { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<Trail> OnSelected { get; set; }
+}

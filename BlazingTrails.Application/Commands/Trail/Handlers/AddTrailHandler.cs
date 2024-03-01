@@ -1,15 +1,16 @@
 ﻿using BlazingTrails.Application.Commands.Trail.Requests;
 using MediatR;
+using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Json;
 
 namespace BlazingTrails.Application.Commands.Trail.Handlers
 {
     public class AddTrailHandler : IRequestHandler<AddTrailRequest, AddTrailResponse>
     {
-        private readonly HttpClient httpClient;
-        public AddTrailHandler(HttpClient httpClient)
+        private readonly IHttpClientFactory httpClientFactory;
+        public AddTrailHandler(IHttpClientFactory httpClientFactory)
         {
-            this.httpClient = httpClient;
+            this.httpClientFactory = httpClientFactory;
         }
 
         public async Task<AddTrailResponse> Handle(AddTrailRequest request, CancellationToken cancellationToken)
@@ -33,11 +34,17 @@ namespace BlazingTrails.Application.Commands.Trail.Handlers
             return status.IsValid;
         }
 
-        public AddTrailResponse CreateErrorResponse(string errorMessage) => new(-1, errorMessage);
+        public AddTrailResponse CreateErrorResponse(string errorMessage) =>
+            new(-1, errorMessage);
 
-        public async Task<HttpResponseMessage> SendRequest(AddTrailRequest request, CancellationToken cancellationToken) =>
-            await httpClient.PostAsJsonAsync(AddTrailRequest.route, request, cancellationToken: cancellationToken);
+        public async Task<HttpResponseMessage> SendRequest(AddTrailRequest request, CancellationToken cancellationToken)
+        {
+            var client = httpClientFactory.CreateClient("SecureAPIClient");
+            var response = await client.PostAsJsonAsync(AddTrailRequest.route, request, cancellationToken);
+            return response;
+        }
 
-        public AddTrailResponse CreateSuccessResponse(int trailId) => new(trailId, null);
+        public AddTrailResponse CreateSuccessResponse(int trailId) =>
+            new(trailId, null);
     }
 }

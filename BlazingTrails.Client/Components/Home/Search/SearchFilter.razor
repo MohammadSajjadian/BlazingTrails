@@ -40,13 +40,13 @@
 
     private void SearchForTrail()
     {
-        var uriWithQuerystring = navManager.GetUriWithQueryParameters(new Dictionary<string, object?>()
+        var uriWithQueryString = navManager.GetUriWithQueryParameters(new Dictionary<string, object?>()
         {
             [nameof(SearchPage.maxLength)] = maxLength == 0 ? null : maxLength,
             [nameof(SearchPage.maxTime)] = maxTime == 0 ? null : maxTime
         });
 
-        navManager.NavigateTo(uriWithQuerystring);
+        navManager.NavigateTo(uriWithQueryString);
     }
 
     private void Clear()

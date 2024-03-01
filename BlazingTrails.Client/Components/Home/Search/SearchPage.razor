@@ -1,7 +1,8 @@
 ﻿@page "/search/{searchTerm}"
-@page "/search/{searchTerm}/maxLength/{maxLength:int}"
+@page "/search/{searchTerm}/maxLength/{maxLength:int}/maxTime/{maxTime:int}"
 
 @inject HttpClient httpClient
+@inject IMediator mediator
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -41,10 +42,25 @@ else
     {
         try
         {
-            var allTrails = await httpClient.GetFromJsonAsync<List<Trail>>("trails/trail-data.json");
+            var response = await mediator.Send(new GetTrailsRequest());
 
-            filteredTrails = allTrails!.Where(x => x.Name.Contains(searchTerm, StringComparison.CurrentCultureIgnoreCase)
-            || x.Location.Contains(searchTerm, StringComparison.CurrentCultureIgnoreCase)).ToList();
+            var allTrails = response.trails.Select(x => new Trail
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Image = x.Image,
+                Description = x.Description,
+                Location = x.Location,
+                Length = x.Length,
+                TimeInMinutes = x.TimeInMinutes,
+                Owner = x.Owner,
+                waypoints = x.Waypoints.Select(wp => new Waypoint { latitude = wp.Latitude, longitude = wp.Longitude }).ToList()
+            });
+
+            filteredTrails = allTrails.
+            Where(x => x.Name.
+            Contains(searchTerm, StringComparison.CurrentCultureIgnoreCase) || x.Location.
+            Contains(searchTerm, StringComparison.CurrentCultureIgnoreCase)).ToList();
 
             cashedFilteredTrails = filteredTrails;
         }
@@ -52,7 +68,6 @@ else
         {
             Console.WriteLine($"There was a problem loading trail data: {ex.Message}");
         }
-
     }
 
     protected override void OnParametersSet()

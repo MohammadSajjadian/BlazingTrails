@@ -21,9 +21,10 @@
 
     private void SearchForTrail(KeyboardEventArgs args)
     {
-        if (args.Key.Equals("Enter")) navManager.NavigateTo($"/search/{searchTerm}");
+        if (args.Key.Equals("Enter"))
+            navManager.NavigateTo($"/search/{searchTerm}");
     }
 
-    private void OnHandleFilter(int maxLength)
-        => this.maxLength = maxLength;
+    private void OnHandleFilter(int maxLength) =>
+        this.maxLength = maxLength;
 }

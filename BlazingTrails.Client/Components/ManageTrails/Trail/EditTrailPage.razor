@@ -1,4 +1,5 @@
 ﻿@page "/edit-trail/{trailId:int}"
+@attribute [Authorize]
 @inject IMediator mediator
 
 <PageTitle>Edit Trail - Blazing Trails</PageTitle>
@@ -49,18 +50,14 @@ else
         else
         {
             oldTrail.Id = trailId;
-            oldTrail.Name = response.trail.name;
-            oldTrail.Description = response.trail.description;
-            oldTrail.Location = response.trail.location;
-            oldTrail.image = response.trail.image;
-            oldTrail.Length = response.trail.length;
-            oldTrail.TimeInMinutes = response.trail.timeInMinutes;
-            oldTrail.Routes.Clear();
-            oldTrail.Routes.AddRange(response.trail.routeInstructions.Select(x => new Domain.Entities.RouteInstruction
-            {
-                Stage = x.Stage,
-                Description = x.Description
-            }));
+            oldTrail.Name = response.trail.Name;
+            oldTrail.Description = response.trail.Description;
+            oldTrail.Location = response.trail.Location;
+            oldTrail.image = response.trail.Image;
+            oldTrail.Length = response.trail.Length;
+            oldTrail.TimeInMinutes = response.trail.TimeInMinutes;
+            oldTrail.Waypoints.Clear();
+            oldTrail.Waypoints.AddRange(response.trail.Waypoints.Select(x => new WaypointDto(x.Latitude, x.Longitude)));
         }
 
         isLoading = false;
@@ -81,12 +78,8 @@ else
             oldTrail.Location = newTrail.Location;
             oldTrail.Length = newTrail.Length;
             oldTrail.TimeInMinutes = newTrail.TimeInMinutes;
-            oldTrail.Routes.Clear();
-            oldTrail.Routes.AddRange(newTrail.Routes.Select(x => new Domain.Entities.RouteInstruction
-            {
-                Stage = x.Stage,
-                Description = x.Description
-            }));
+            oldTrail.Waypoints.Clear();
+            oldTrail.Waypoints.AddRange(newTrail.Waypoints.Select(x => new WaypointDto(x.Latitude, x.Longitude)));
             isSuccessful = true;
 
             if (newTrail.ImageAction is ImageAction.Remove)

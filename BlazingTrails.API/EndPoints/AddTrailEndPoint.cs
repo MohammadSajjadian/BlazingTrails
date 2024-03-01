@@ -1,6 +1,9 @@
 ﻿using Ardalis.ApiEndpoints;
 using BlazingTrails.Application.Commands.Trail.Requests;
+using BlazingTrails.Domain.Entities;
 using BlazingTrails.Infra.Context;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Trail = BlazingTrails.Domain.Entities.Trail;
 
@@ -14,16 +17,9 @@ namespace BlazingTrails.API.EndPoints
             this.db = db;
         }
 
+        [Authorize]
         [HttpPost(AddTrailRequest.route)]
         public override async Task<ActionResult<int>> HandleAsync(AddTrailRequest request, CancellationToken cancellationToken = default)
-        {
-            var trail = await AddTrailAsync(request, cancellationToken);
-            await AddRouteInstructionAsync(trail, request, cancellationToken);
-            await db.SaveChangesAsync(cancellationToken);
-            return Ok(trail.Id);
-        }
-
-        private async Task<Trail> AddTrailAsync(AddTrailRequest request, CancellationToken cancellationToken = default)
         {
             var trail = new Trail
             {
@@ -31,23 +27,16 @@ namespace BlazingTrails.API.EndPoints
                 Description = request.trailDto.Description,
                 Location = request.trailDto.Location,
                 TimeInMinutes = request.trailDto.TimeInMinutes,
-                Length = request.trailDto.Length
+                Length = request.trailDto.Length,
+                waypoints = request.trailDto.Waypoints.Select(wp => new Waypoint
+                {
+                    latitude = wp.Latitude,
+                    longitude = wp.Longitude
+                }).ToList()
             };
-
             await db.trails.AddAsync(trail, cancellationToken);
-            return trail;
-        }
-
-        private async Task AddRouteInstructionAsync(Trail trail, AddTrailRequest request, CancellationToken cancellationToken = default)
-        {
-            var routeInstructions = request.trailDto.Routes.Select(x => new Domain.Entities.RouteInstruction
-            {
-                Stage = x.Stage,
-                Description = x.Description,
-                Trail = trail
-            });
-
-            await db.routeInstructions.AddRangeAsync(routeInstructions, cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
+            return Ok(trail.Id);
         }
     }
 }

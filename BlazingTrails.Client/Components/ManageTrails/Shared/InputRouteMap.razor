@@ -1,0 +1,43 @@
+﻿@inherits InputBase<List<WaypointDto>>
+
+<div class="@CssClass">
+    <RouteMap Width="100%" OnWaypointAdded="AddWaypoint" OnWaypointDeleted="DeleteWaypoint" Waypoints="_waypoints" />
+</div>
+
+@code {
+    private List<LatLongDto> _waypoints = new();
+
+    protected override void OnParametersSet()
+    {
+        if (CurrentValue?.Count > 0)
+        {
+            _waypoints.Clear();
+            _waypoints.AddRange(CurrentValue.Select(x => new LatLongDto(x.Latitude, x.Longitude)));
+        }
+    }
+
+    protected override bool TryParseValueFromString(string value, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out List<WaypointDto> result, [System.Diagnostics.CodeAnalysis.NotNullWhen(false)] out string validationErrorMessage)
+        => throw new NotImplementedException();
+
+    private void AddWaypoint(LatLongDto waypoint)
+    {
+        _waypoints.Add(waypoint);
+        CheckIfCurrentValueNull();
+        CurrentValue.Add(new WaypointDto(waypoint.Lat, waypoint.Lng));
+    }
+
+    private void DeleteWaypoint(LatLongDto waypoint)
+    {
+        if (_waypoints.Any())
+        {
+            _waypoints.Remove(waypoint);
+            CurrentValue?.Remove(new WaypointDto(waypoint.Lat, waypoint.Lng));
+        }
+    }
+
+    private void CheckIfCurrentValueNull()
+    {
+        if (CurrentValue is null)
+            CurrentValue = new List<WaypointDto>();
+    }
+}

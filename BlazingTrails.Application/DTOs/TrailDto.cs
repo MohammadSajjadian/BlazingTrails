@@ -1,5 +1,4 @@
 ﻿using BlazingTrails.Application.Enum;
-using BlazingTrails.Domain.Entities;
 
 namespace BlazingTrails.Application.DTOs
 {
@@ -11,8 +10,8 @@ namespace BlazingTrails.Application.DTOs
         public string? image { get; set; }
         public int Length { get; set; }
         public int TimeInMinutes { get; set; }
-        public string Location { get; set; } =   "";
-        public List<RouteInstruction> Routes { get; set; } = new List<RouteInstruction>();
+        public string Location { get; set; } = "";
+        public List<WaypointDto> Waypoints { get; set; } = new();
 
         public ImageAction ImageAction { get; set; }
     }

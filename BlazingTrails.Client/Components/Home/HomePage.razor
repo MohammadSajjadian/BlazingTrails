@@ -1,21 +1,96 @@
 ﻿@page "/"
-@inject HttpClient httpClient
 
+@inject HttpClient httpClient
+@inject IMediator mediator
+@inject NavigationManager navManager
+
+<TrailSearch />
 @if (trails is null)
 {
-    <p>Loading trails...</p>
+    <div class="no-trails">
+        <svg viewBox="0 0 16 16" class="bi bi-tree" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M8 0a.5.5 0 0 1 .416.223l3 4.5A.5.5 0 0 1 11 5.5h-.098l2.022 3.235a.5.5 0 0 1-.424.765h-.191l1.638 3.276a.5.5 0 0 1-.447.724h-11a.5.5 0 0 1-.447-.724L3.69 9.5H3.5a.5.5 0 0 1-.424-.765L5.098 5.5H5a.5.5 0 0 1-.416-.777l3-4.5A.5.5 0 0 1 8 0zM5.934 4.5H6a.5.5 0 0 1 .424.765L4.402 8.5H4.5a.5.5 0 0 1 .447.724L3.31 12.5h9.382l-1.638-3.276A.5.5 0 0 1 11.5 8.5h.098L9.576 5.265A.5.5 0 0 1 10 4.5h.066L8 1.401 5.934 4.5z" />
+            <path d="M7 13.5h2V16H7v-2.5z" />
+        </svg>
+        <AuthorizeView>
+            <Authorized>
+                <h3 class="text-muted font-weight-light">
+                    We currently don't have any trails, <a href="add-trail">why not add one?</a>
+                </h3>
+            </Authorized>
+            <NotAuthorized>
+                <h3 class="text-muted font-weight-light">
+                    Do you have an awesome trail you'd like to share? Please <a href="authentication/login">log in or sign up</a>.
+                </h3>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
 }
 else
 {
-    <TrailSearch />
-
     <TrailDetails trail="selectedTrail" />
-    <div class="grid">
-        @foreach (var trail in trails)
-        {
+    <AuthorizeView>
+        <Authorized>
+            <div class="mb-4">
+                <p class="font-italic text-center">
+                    Do you have an awesome trail you'd like to share? <a href="add-trail">Add it here</a>.
+                </p>
+            </div>
+        </Authorized>
+        <NotAuthorized>
+            <div class="mb-4">
+                <p class="font-italic text-center">
+                    Do you have an awesome trail you'd like to share? Please <a href="authentication/login">log in or sign up</a>.
+                </p>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+
+    <ViewSwitcher items="trails" Context="trail">
+
+        <GridTemplate>
             <TrailCard trail="trail" OnSelected="HandleTrailSelected" />
-        }
-    </div>
+        </GridTemplate>
+
+        <TableHeader>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Location</th>
+                    <th>Length</th>
+                    <th>Time</th>
+                    <th></th>
+                </tr>
+            </thead>
+        </TableHeader>
+
+        <RowTemplate>
+            @{
+                var hours = trail.TimeInMinutes / 60;
+                var remainedMinutes = trail.TimeInMinutes % 60;
+            }
+            <tr>
+                <th scope="col">@trail.Name</th>
+                <td>@trail.Location</td>
+                <td>@(trail.Length) km</td>
+                <td>@($"{hours} hours" + (remainedMinutes is not 0 ? $", {remainedMinutes} minutes" : ""))</td>
+                <td class="text-right">
+                    <button @onclick="@(() => HandleTrailSelected(trail))" title="View" class="btn btn-primary">
+                        <i class="fa fa-binoculars"></i>
+                    </button>
+                    <AuthorizeView>
+                        @if (trail.Owner.Equals(context.User.Identity?.Name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            <button @onclick="@(() => navManager.NavigateTo($"/edit-trail/{trail.Id}"))" title="Edit" class="btn btn-outline-secondary">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                        }
+                    </AuthorizeView>
+                </td>
+            </tr>
+        </RowTemplate>
+
+    </ViewSwitcher>
 }
 
 @code{
@@ -24,16 +99,24 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        try
+        var response = await mediator.Send(new GetTrailsRequest());
+        if (response.trails.Any())
         {
-            trails = await httpClient.GetFromJsonAsync<List<Trail>>("trails/trail-data.json");
-        }
-        catch (HttpRequestException ex)
-        {
-            Console.WriteLine($"Something went wrong in loading json data: {ex.Message}");
+            trails = response.trails.Select(x => new Trail
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Image = x.Image,
+                Description = x.Description,
+                Location = x.Location,
+                Length = x.Length,
+                TimeInMinutes = x.TimeInMinutes,
+                Owner = x.Owner,
+                waypoints = x.Waypoints.Select(wp => new Waypoint { latitude = wp.Latitude, longitude = wp.Longitude }).ToList()
+            }).ToList();
         }
     }
 
-    private void HandleTrailSelected(Trail trail)
-        => selectedTrail = trail;
+    private void HandleTrailSelected(Trail trail) =>
+        selectedTrail = trail;
 }

@@ -1,7 +1,6 @@
-using BlazingTrails.Application;
 using BlazingTrails.Infra;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.FileProviders;
-using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +9,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddAuthentication(opt =>
+{
+    opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(opt =>
+{
+    opt.Authority = builder.Configuration["Auth0:Domain"];
+    opt.Audience = builder.Configuration["Auth0:Audience"];
+});
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -38,6 +47,7 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/Images"
 });
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

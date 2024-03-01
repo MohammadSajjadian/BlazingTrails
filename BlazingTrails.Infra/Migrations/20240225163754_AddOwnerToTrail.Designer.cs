@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlazingTrails.Infra.Migrations
 {
     [DbContext(typeof(BlazingTrailsContext))]
-    [Migration("20231220135138_InitialEntities")]
-    partial class InitialEntities
+    [Migration("20240225163754_AddOwnerToTrail")]
+    partial class AddOwnerToTrail
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,31 +23,6 @@ namespace BlazingTrails.Infra.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("BlazingTrails.Domain.Entities.RouteInstruction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Stage")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TrailId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TrailId");
-
-                    b.ToTable("routeInstructions");
-                });
 
             modelBuilder.Entity("BlazingTrails.Domain.Entities.Trail", b =>
                 {
@@ -75,6 +50,10 @@ namespace BlazingTrails.Infra.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Owner")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("TimeInMinutes")
                         .HasColumnType("int");
 
@@ -83,20 +62,44 @@ namespace BlazingTrails.Infra.Migrations
                     b.ToTable("trails");
                 });
 
-            modelBuilder.Entity("BlazingTrails.Domain.Entities.RouteInstruction", b =>
+            modelBuilder.Entity("BlazingTrails.Domain.Entities.Waypoint", b =>
                 {
-                    b.HasOne("BlazingTrails.Domain.Entities.Trail", "Trail")
-                        .WithMany("Route")
-                        .HasForeignKey("TrailId")
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<decimal>("latitude")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("longitude")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("trailId")
+                        .HasColumnType("int");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("trailId");
+
+                    b.ToTable("waypoints");
+                });
+
+            modelBuilder.Entity("BlazingTrails.Domain.Entities.Waypoint", b =>
+                {
+                    b.HasOne("BlazingTrails.Domain.Entities.Trail", "trail")
+                        .WithMany("waypoints")
+                        .HasForeignKey("trailId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Trail");
+                    b.Navigation("trail");
                 });
 
             modelBuilder.Entity("BlazingTrails.Domain.Entities.Trail", b =>
                 {
-                    b.Navigation("Route");
+                    b.Navigation("waypoints");
                 });
 #pragma warning restore 612, 618
         }

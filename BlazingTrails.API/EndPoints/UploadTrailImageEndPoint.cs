@@ -4,6 +4,7 @@ using BlazingTrails.Infra.Context;
 using Microsoft.AspNetCore.Mvc;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BlazingTrails.API.EndPoints
 {
@@ -15,21 +16,27 @@ namespace BlazingTrails.API.EndPoints
             this.db = db;
         }
 
+        [Authorize]
         [HttpPost(UploadTrailImageRequest.route)]
         public override async Task<ActionResult<string>> HandleAsync(int trailId, CancellationToken cancellationToken = default)
         {
             var trail = db.trails.Find(trailId);
-            if (trail is null) return BadRequest("Trail dose not found.");
+            if (trail is null)
+                return BadRequest("Trail dose not found.");
+
+            if (!trail.Owner.Equals(User.Identity.Name, StringComparison.OrdinalIgnoreCase))
+                return Unauthorized();
 
             var file = Request.Form.Files[0];
-            if (file.Length is 0) return BadRequest("Image not found.");
+            if (file.Length is 0)
+                return BadRequest("Image not found.");
 
             var fileName = $"{Guid.NewGuid()}.jpg";
             var saveLocation = Path.Combine(Directory.GetCurrentDirectory(), "images", fileName);
 
             var resizeOptions = new ResizeOptions()
             {
-                Mode = ResizeMode.Pad,
+                Mode = ResizeMode.Stretch,
                 Size = new Size(640, 426),
             };
 

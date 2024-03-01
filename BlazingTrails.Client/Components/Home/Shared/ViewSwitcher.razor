@@ -1,0 +1,54 @@
+﻿@typeparam Tparam
+
+<div>
+    <div class="mb-3 text-end">
+        <div class="btn-group">
+            <button @onclick="@(() => mode = ViewMode.Grid)" title="Grid View" type="button" class="btn @(mode == ViewMode.Grid ? "btn-secondary" : "btn-outline-secondary")">
+                <i class="fa fa-th-large"></i>
+            </button>
+            <button @onclick="@(() => mode = ViewMode.Table)" title="Table View" type="button" class="btn @(mode == ViewMode.Table ? "btn-secondary" : "btn-outline-secondary")">
+                <i class="fa fa-table"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (mode is ViewMode.Grid)
+    {
+        <div class="grid">
+            @foreach (var item in items)
+            {
+                @GridTemplate(item)
+            }
+        </div>
+    }
+    else if (mode is ViewMode.Table)
+    {
+        <table class="table table-striped">
+            @TableHeader
+            <tbody>
+                @foreach (var item in items)
+                {
+                    @RowTemplate(item)
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private enum ViewMode { Grid, Table }
+
+    private ViewMode mode = ViewMode.Grid;
+
+    [Parameter, EditorRequired]
+    public List<Tparam> items { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public RenderFragment<Tparam> GridTemplate { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public RenderFragment TableHeader { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public RenderFragment<Tparam> RowTemplate { get; set; } = default!;
+}
