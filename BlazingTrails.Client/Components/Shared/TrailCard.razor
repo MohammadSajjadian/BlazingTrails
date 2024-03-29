@@ -26,8 +26,9 @@
         <button class="btn btn-primary" @onclick="@(async () => await OnSelected.InvokeAsync(trail))">
             <i class="fa fa-binoculars"></i>
         </button>
+        <FavoriteButton Trail="trail" />
         <AuthorizeView>
-            @if (trail.Owner.Equals(context.User.Identity?.Name, StringComparison.OrdinalIgnoreCase))
+            @if (trail.Owner.Equals(context.User.Identity?.Name, StringComparison.OrdinalIgnoreCase) || context.User.IsInRole("Administrator"))
             {
                 <button class="btn btn-outline-secondary float-right" title="Edit" @onclick="@(() => navManager.NavigateTo($"/edit-trail/{trail.Id}"))">
                     <i class="fa fa-pencil"></i>

@@ -5,6 +5,7 @@ using BlazingTrails.Infra.Context;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Trail = BlazingTrails.Domain.Entities.Trail;
 
 namespace BlazingTrails.API.EndPoints
@@ -28,6 +29,7 @@ namespace BlazingTrails.API.EndPoints
                 Location = request.trailDto.Location,
                 TimeInMinutes = request.trailDto.TimeInMinutes,
                 Length = request.trailDto.Length,
+                Owner = User.Identity?.Name!,
                 waypoints = request.trailDto.Waypoints.Select(wp => new Waypoint
                 {
                     latitude = wp.Latitude,

@@ -1,10 +1,10 @@
 ﻿using Ardalis.ApiEndpoints;
 using BlazingTrails.Application.Commands.Trail.Requests;
 using BlazingTrails.Infra.Context;
-using Microsoft.AspNetCore.Mvc;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 
 namespace BlazingTrails.API.EndPoints
 {
@@ -24,7 +24,8 @@ namespace BlazingTrails.API.EndPoints
             if (trail is null)
                 return BadRequest("Trail dose not found.");
 
-            if (!trail.Owner.Equals(User.Identity.Name, StringComparison.OrdinalIgnoreCase))
+            if (!trail.Owner.Equals(HttpContext.User.Identity!.Name, StringComparison.CurrentCultureIgnoreCase) &&
+                !HttpContext.User.IsInRole("Administrator"))
                 return Unauthorized();
 
             var file = Request.Form.Files[0];

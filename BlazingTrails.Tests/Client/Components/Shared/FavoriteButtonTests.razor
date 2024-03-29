@@ -1,0 +1,80 @@
+﻿@inherits TestContext
+
+@code {
+    private readonly Fixture _fixture = new();
+
+    public FavoriteButtonTests()
+    {
+        this.AddBlazoredLocalStorage();
+        this.Services.AddScoped<AppState>();
+
+        _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+        .ForEach(b => _fixture.Behaviors.Remove(b));
+        _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+    }
+
+    [Fact]
+    public void RendersAddFavoriteButton_When_TrailIsNotFavorited()
+    {
+        // Arrenge
+        var trail = _fixture.Create<Trail>();
+
+        // Act
+        var cut = Render(@<FavoriteButton Trail="trail" />);
+
+        // Assert
+        cut.MarkupMatches(@<button class="btn btn-outline-primary ml-1" title="Favorite"> <i class="fa fa-heart-o"></i></button>);
+    }
+
+    [Fact]
+    public async Task RendersAddFavoriteButton_When_TrailIsFavorited()
+    {
+        // Arrange
+        var trail = _fixture.Create<Trail>();
+
+        var appState = this.Services.GetService<AppState>();
+        await appState.FavoriteTrailsState.AddFavorite(trail);
+        
+        // Act
+        var cut = Render(@<FavoriteButton Trail="trail" />);
+        
+        // Assert
+        cut.MarkupMatches(@<button class="btn btn-outline-primary ml-1" title="Favorite"> <i class="fa fa-heart"></i></button>);
+    }
+
+    [Fact]
+    public void AddTrailToFavorites_When_TrailIsNotAFavorite()
+    {
+        // Arrange
+        var trail = _fixture.Create<Trail>();
+        var cut = Render(@<FavoriteButton Trail="trail" />);
+        var button = cut.Find("button");
+
+        // Act
+        button.Click();
+
+        // Assert
+        var appState = this.Services.GetService<AppState>();
+        Assert.True(appState.FavoriteTrailsState.IsFavorite(trail));
+    }
+
+    [Fact]
+    public async Task AddTrailToFavorites_When_TrailIsAFavorite()
+    {
+        // Arrange
+        var trail = _fixture.Create<Trail>();
+
+        var appState = this.Services.GetService<AppState>();
+        await appState.FavoriteTrailsState.AddFavorite(trail);
+
+        var cut = Render(@<FavoriteButton Trail="trail" />);
+
+        var button = cut.Find("button");
+
+        // Act
+        button.Click();
+
+        // Assert
+        Assert.False(appState.FavoriteTrailsState.IsFavorite(trail));
+    }
+}

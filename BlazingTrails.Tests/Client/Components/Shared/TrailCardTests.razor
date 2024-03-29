@@ -1,0 +1,50 @@
+﻿@inherits TestContext
+
+@code {
+    private readonly TestAuthorizationContext _authContext;
+    private readonly Fixture _fixture = new();
+
+    public TrailCardTests()
+    {
+        this.AddBlazoredLocalStorage();
+        this.Services.AddScoped<AppState>();
+
+        _authContext = this.AddTestAuthorization();
+
+        _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+            .ForEach(b => _fixture.Behaviors.Remove(b));
+        _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+    }
+
+    [Fact]
+    public void RendersEditButton_When_UserIsAuthorized()
+    {
+        // Arrange
+        var authorizedUser = _authContext.SetAuthorized("Test user");
+        var trail = _fixture.Create<Trail>();
+        trail.Owner = authorizedUser.UserName;
+
+        // Act
+        var cut = Render(@<TrailCard trail="trail" />);
+
+        // Assert
+        var button = cut.Find("button[title=\"Edit\"]");
+        Assert.NotNull(button);
+    }
+
+    [Fact]
+    public void RendersEditButton_When_UserIsAdmin()
+    {
+        // Arrange
+        var authorizedUser = _authContext.SetAuthorized("Test user");
+        authorizedUser.SetRoles("Administrator");
+        var trail = _fixture.Create<Trail>();
+
+        // Act
+        var cut = Render(@<TrailCard trail="trail" />);
+
+        // Assert
+        var button = cut.Find("button[title=\"Edit\"]");
+        Assert.NotNull(button);
+    }
+}

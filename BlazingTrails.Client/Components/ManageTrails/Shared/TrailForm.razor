@@ -1,4 +1,6 @@
-﻿<EditForm EditContext="editContext" OnValidSubmit="SubmitForm">
+﻿@inject AppState appState
+
+<EditForm EditContext="editContext" OnValidSubmit="SubmitForm">
     <FormSection Title="Basic Details" HelpText="This information is used to identify the trail and can be searched to help hikers find it.">
         <FormFieldSet width="col-6">
             <label for="trailName" class="font-weight-bold text-secondary">Name</label>
@@ -59,6 +61,7 @@
         </div>
     </div>
     <FluentValidationValidator />
+    <FormStateTracker />
 </EditForm>
 
 @code {
@@ -90,6 +93,10 @@
             trail.Waypoints.Clear();
             trail.Waypoints.AddRange(oldTrail.Waypoints.Select(wp => new WaypointDto(wp.Latitude, wp.Longitude)));
         }
+        //else
+        //{
+        //    trail = appState.GetTrail();
+        //}
     }
 
     private async Task SubmitForm() =>
@@ -113,5 +120,6 @@
         editContext = new EditContext(trail);
         editContext.SetFieldCssClassProvider(new FieldCssClassProvider());
         trailImg = null;
+        appState.ClearTrail();
     }
 }

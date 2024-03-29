@@ -6,17 +6,17 @@ namespace BlazingTrails.Application.Commands.Trail.Handlers
 {
     public class EditTrailHandler : IRequestHandler<EditTrailRequest, EditTrailResponse>
     {
-        private readonly IHttpClientFactory httpClientFactory;
-
-        public EditTrailHandler(IHttpClientFactory httpClientFactory)
+        private readonly IHttpClientFactory _httpClientFactory;
+        public EditTrailHandler(IHttpClientFactory _httpClientFactory)
         {
-            this.httpClientFactory = httpClientFactory;
+            this._httpClientFactory = _httpClientFactory;
         }
 
         public async Task<EditTrailResponse> Handle(EditTrailRequest request, CancellationToken cancellationToken)
         {
-            var client = httpClientFactory.CreateClient("SecureAPIClient");
+            var client = _httpClientFactory.CreateClient("SecureAPIClient");
             var response = await client.PutAsJsonAsync(EditTrailRequest.route, request, cancellationToken);
+
             if (response.IsSuccessStatusCode)
                 return new EditTrailResponse(true, null);
             else

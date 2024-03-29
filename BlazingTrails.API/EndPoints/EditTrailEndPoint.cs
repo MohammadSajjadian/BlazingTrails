@@ -6,6 +6,7 @@ using BlazingTrails.Infra.Context;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace BlazingTrails.API.EndPoints
 {
@@ -25,7 +26,8 @@ namespace BlazingTrails.API.EndPoints
             if (trail is null)
                 return BadRequest("Trail could not be found.");
 
-            if (!trail.Owner.Equals(User.Identity.Name, StringComparison.OrdinalIgnoreCase))
+            if (!trail.Owner.Equals(HttpContext.User.Identity!.Name, StringComparison.CurrentCultureIgnoreCase) &&
+                !HttpContext.User.IsInRole("Administrator"))
                 return Unauthorized();
 
             trail.Name = request.trailDto.Name;
